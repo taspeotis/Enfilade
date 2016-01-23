@@ -6,7 +6,7 @@
 
         public static class Fonts
         {
-            private const string FontsPath = Assets.AssetsPath + "Fonts/";
+            private const string FontsPath = AssetsPath + "Fonts/";
 
             public const string KenVectorFuture12 = FontsPath + nameof(KenVectorFuture12);
 
@@ -15,6 +15,27 @@
             public const string KenVectorFutureThin12 = FontsPath + nameof(KenVectorFutureThin12);
 
             public const string KenVectorFutureThin18 = FontsPath + nameof(KenVectorFutureThin18);
+        }
+
+        public static class Sprites
+        {
+            private const string SpritesPath = AssetsPath + "Sprites/";
+
+            public static class UserInterface
+            {
+                private const string UserInterfacePath = SpritesPath + "UserInterface/";
+
+                public static class Panel
+                {
+                    private const string PanelPath = UserInterfacePath + "Panel/";
+
+                    public const string GlassPanel = PanelPath + nameof(GlassPanel) + ".png";
+
+                    public const string GlassPanelCorners = PanelPath + nameof(GlassPanelCorners) + ".png";
+
+                    // GlassPanelTab is unused
+                }
+            }
         }
     }
 }

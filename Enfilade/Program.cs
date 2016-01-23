@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
+using Microsoft.Xna.Framework;
 
 namespace Enfilade
 {
