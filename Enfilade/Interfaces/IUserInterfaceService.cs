@@ -7,6 +7,6 @@ namespace Enfilade.Interfaces
     public interface IUserInterfaceService
     {
         void DrawGlassPanel(GlassStyle glassStyle, string panelTitle,
-            Rectangle destinationRectangle, Action<SpriteBatch, Rectangle> spriteBatchAction);
+            Rectangle destinationRectangle, Action<SpriteBatch, Rectangle, SpriteFont> spriteBatchAction);
     }
 }

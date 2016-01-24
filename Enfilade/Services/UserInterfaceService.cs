@@ -44,11 +44,16 @@ namespace Enfilade.Services
         }
 
         public void DrawGlassPanel(GlassStyle glassStyle, string panelTitle,
-            Rectangle destinationRectangle, Action<SpriteBatch, Rectangle> spriteBatchAction)
+            Rectangle destinationRectangle, Action<SpriteBatch, Rectangle, SpriteFont> spriteBatchAction)
         {
             using (var spriteBatch = new SpriteBatch(_graphicsDevice))
             {
                 spriteBatch.Begin();
+
+                // This should be:
+                // 4x DrawCorner
+                // DrawMiddle
+                // 4x DrawSide
 
                 // 50 px high minimum
                 // 14 px corners
@@ -57,7 +62,7 @@ namespace Enfilade.Services
                 DrawBottomLeft(glassStyle.HasFlag(GlassStyle.BottomLeftCorner), destinationRectangle, spriteBatch);
 
                 DrawTop(destinationRectangle, spriteBatch);
-                DrawMiddle(panelTitle, destinationRectangle, spriteBatch);
+                DrawMiddle(panelTitle, destinationRectangle, spriteBatch, spriteBatchAction);
                 DrawBottom(destinationRectangle, spriteBatch);
 
                 DrawTopRight(glassStyle.HasFlag(GlassStyle.TopRightCorner), destinationRectangle, spriteBatch);
@@ -68,7 +73,8 @@ namespace Enfilade.Services
             }
         }
 
-        private void DrawMiddle(string panelTitle, Rectangle destinationRectangle, SpriteBatch spriteBatch)
+        private void DrawMiddle(string panelTitle, Rectangle destinationRectangle, 
+            SpriteBatch spriteBatch,Action<SpriteBatch, Rectangle, SpriteFont> spriteBatchAction)
         {
             // draw the bg
             var rectangle = new Rectangle(
@@ -81,9 +87,12 @@ namespace Enfilade.Services
 
             spriteBatch.Draw(_lazyGlassPanel.Value, rectangle, sourceRectangle, Color.White);
 
+            // TODO: Pass the lazy, people might not want to draw with the font
+            var spriteFont = _lazySpriteFont.Value;
+
             if (!String.IsNullOrEmpty(panelTitle))
             {
-                var spriteFont = _lazySpriteFont.Value;
+                
 
                 // draw the text
                 var q = spriteFont.LineSpacing;
@@ -93,7 +102,12 @@ namespace Enfilade.Services
                 v2.Y -= 2;
 
                 spriteBatch.DrawString(spriteFont, panelTitle, v2, new Color(46, 74, 95));
+
+                var xInt = (int) dims.X;
+                rectangle = new Rectangle(rectangle.X + xInt, rectangle.Y, rectangle.Width - xInt, rectangle.Height);
             }
+            
+            spriteBatchAction?.Invoke(spriteBatch, rectangle, spriteFont);
         }
 
         private void DrawBottomLeft(bool cornerStyle, Rectangle destinationRectangle, SpriteBatch spriteBatch)

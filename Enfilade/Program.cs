@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 namespace Enfilade
 {
@@ -9,8 +7,12 @@ namespace Enfilade
         public static void Main()
         {
             using (var enfiladeGame = new EnfiladeGame())
-            using (new GraphicsDeviceManager(enfiladeGame))
+            using (var graphicsDeviceManager = new GraphicsDeviceManager(enfiladeGame))
+            {
+                graphicsDeviceManager.PreferMultiSampling = true;
+
                 enfiladeGame.Run();
+            }
         }
     }
 }

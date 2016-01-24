@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.IO;
 using Enfilade.Interfaces;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace Enfilade
 {
@@ -12,12 +10,11 @@ namespace Enfilade
         private static readonly AssemblyCatalog AssemblyCatalog = new AssemblyCatalog(typeof (EnfiladeGame).Assembly);
 
         private CompositionContainer _compositionContainer;
+        private IModelService _modelService;
         private IUserInterfaceService _userInterfaceService;
 
         protected override void BeginRun()
         {
-            base.BeginRun();
-
             _compositionContainer = new CompositionContainer(AssemblyCatalog);
 
             try
@@ -26,6 +23,7 @@ namespace Enfilade
                 _compositionContainer.ComposeExportedValue(Content);
                 _compositionContainer.ComposeExportedValue(GraphicsDevice);
 
+                _modelService = _compositionContainer.GetExportedValue<IModelService>();
                 _userInterfaceService = _compositionContainer.GetExportedValue<IUserInterfaceService>();
             }
             catch
@@ -35,6 +33,8 @@ namespace Enfilade
 
                 throw;
             }
+
+            base.BeginRun();
         }
 
         protected override void EndRun()
@@ -45,53 +45,99 @@ namespace Enfilade
             _compositionContainer = null;
         }
 
+        private float _y = -5 ;
+
         protected override void Draw(GameTime gameTime)
         {
-            base.Draw(gameTime);
-
-            var spriteFont = Content.Load<SpriteFont>(Assets.Fonts.KenVectorFutureThin12);
-
             GraphicsDevice.Clear(new Color(63, 124, 182));
 
-            DrawShields();
+            var model = _modelService.Load("Assets/Models/Large_Oak_Dark_01.obj");
 
-            using (var y = new SpriteBatch(GraphicsDevice))
+            var aspectRatio = GraphicsDevice.Viewport.AspectRatio;
+
+            var world = Matrix.Identity;
+            var view = Matrix.CreateLookAt(new Vector3(10, 10, 10), Vector3.Zero, Vector3.Up);
+            var projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 100);
+
+            var originalState = GraphicsDevice.RasterizerState;
+
+            try
             {
-                y.Begin();
+                //GraphicsDevice.RasterizerState = new RasterizerState { FillMode = FillMode.WireFrame };
 
-                var totalSeconds = gameTime.ElapsedGameTime.TotalSeconds;
-
-                if (totalSeconds > 0)
-                    y.DrawString(spriteFont, $"Frames Per Second: {1/totalSeconds:F0}", new Vector2(50, 50), Color.Pink);
-
-                y.End();
+                model.Draw(world, view, projection);
             }
-        }
-
-        private void DrawShields()
-        {
-            _userInterfaceService.DrawGlassPanel(GlassStyle.TopLeftCorner, "FPS", new Rectangle(8, 8, 250, 42), null);
-            return;
-            // 50 high
-            // 14x14 corners
-            var destination = new Rectangle(0, 0, 25, 25);
-            var source = new Rectangle(0, 0, 25, 25);
-
-            // TODO: One of these for the user interface
-            using (var spriteBatch = new SpriteBatch(GraphicsDevice))
+            finally
             {
-                spriteBatch.Begin();
+                GraphicsDevice.RasterizerState = originalState;
+            }
 
-                const string path = "Assets/Sprites/UserInterface/glassPanel_cornerTL.png";
+            /*
+            var vertexBuffer = new VertexBuffer(GraphicsDevice, typeof (VertexPositionColor), 3, BufferUsage.None);
 
-                using (var stream = File.Open(path, FileMode.Open, FileAccess.Read))
-                using (var texture = Texture2D.FromStream(GraphicsDevice, stream))
+            var random = new Random();
+
+            vertexBuffer.SetData(new[]
+            {
+                new VertexPositionColor(new Vector3(random.Next(-10, 10), random.Next(-10, 10), random.Next(-10, 10)), Color.Pink),
+                new VertexPositionColor(new Vector3(random.Next(-10, 10), random.Next(-10, 10), random.Next(-10, 10)), Color.White),
+                new VertexPositionColor(new Vector3(random.Next(-10, 10), random.Next(-10, 10), random.Next(-10, 10)), Color.Green)
+            });
+
+            var indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.ThirtyTwoBits, 3, BufferUsage.None);
+
+            indexBuffer.SetData(new[] {0, 1, 2});
+
+            var modelBone = new ModelBone {Transform = Matrix.Identity};
+            var basicEffect = new BasicEffect(GraphicsDevice) {VertexColorEnabled = true};
+            var modelMeshPart = new ModelMeshPart {IndexBuffer = indexBuffer, NumVertices = 3, PrimitiveCount = 1, VertexBuffer = vertexBuffer};
+            var modelMesh = new ModelMesh(GraphicsDevice, new List<ModelMeshPart> {modelMeshPart})
+            {
+                ParentBone = modelBone,
+                Effects = new ModelEffectCollection(new List<Effect> {basicEffect})
+            };
+
+            modelMeshPart.Effect = basicEffect;
+
+
+            var model = new Model(GraphicsDevice, new List<ModelBone> {modelBone}, new List<ModelMesh> {modelMesh});
+
+            
+
+            var originalState = GraphicsDevice.RasterizerState;
+
+            try
+            {
+                GraphicsDevice.RasterizerState = new RasterizerState {FillMode = FillMode.WireFrame};
+
+                model.Draw(world, view, projection);
+            }
+            finally
+            {
+                GraphicsDevice.RasterizerState = originalState;
+            }
+
+    */
+            // draw all the stuff
+            var destinationRectangle = new Rectangle(8, 8, 83, 42);
+
+            _userInterfaceService.DrawGlassPanel(GlassStyle.TopLeftCorner, "FPS", destinationRectangle,
+                (spriteBatch, rectangle, spriteFont) =>
                 {
-                    spriteBatch.Draw(texture, destination, source, Color.White);
+                    var totalSeconds = gameTime.ElapsedGameTime.TotalSeconds;
 
-                    spriteBatch.End();
-                }
-            }
+                    if (totalSeconds > 0)
+                    {
+                        var position = rectangle.Location.ToVector2();
+
+                        position.X += 3;
+                        position.Y -= 2;
+
+                        spriteBatch.DrawString(spriteFont, $"{1/totalSeconds:F0}", position, Color.Pink);
+                    }
+                });
+
+            base.Draw(gameTime);
         }
     }
 }
