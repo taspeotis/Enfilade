@@ -2,6 +2,7 @@
 using System.ComponentModel.Composition.Hosting;
 using Enfilade.Interfaces;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Enfilade
 {
@@ -12,6 +13,9 @@ namespace Enfilade
         private CompositionContainer _compositionContainer;
         private IModelService _modelService;
         private IUserInterfaceService _userInterfaceService;
+        private Model _largeOakDarkModel;
+        private Model _plateGrassModel;
+        private Model _plateRiverModel;
 
         protected override void BeginRun()
         {
@@ -25,6 +29,10 @@ namespace Enfilade
 
                 _modelService = _compositionContainer.GetExportedValue<IModelService>();
                 _userInterfaceService = _compositionContainer.GetExportedValue<IUserInterfaceService>();
+
+                _largeOakDarkModel = _modelService.Load("Assets/Models/Large_Oak_Dark_01.obj");
+                _plateGrassModel = _modelService.Load("Assets/Models/Plate_Grass_01.obj");
+                _plateRiverModel = _modelService.Load("Assets/Models/Plate_River_01.obj");
             }
             catch
             {
@@ -45,79 +53,40 @@ namespace Enfilade
             _compositionContainer = null;
         }
 
-        private float _y = -5 ;
-
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(new Color(63, 124, 182));
 
-            var model = _modelService.Load("Assets/Models/Large_Oak_Dark_01.obj");
-
             var aspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
-            var world = Matrix.Identity;
-            var view = Matrix.CreateLookAt(new Vector3(10, 10, 10), Vector3.Zero, Vector3.Up);
+            var rotationY = Matrix.CreateRotationY((float) gameTime.TotalGameTime.TotalSeconds/2);
+            var world = Matrix.Multiply(rotationY, Matrix.Identity);
+            var view = Matrix.CreateLookAt(new Vector3(3, 3, 3), Vector3.Zero, Vector3.Up);
             var projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 100);
 
-            var originalState = GraphicsDevice.RasterizerState;
+            GraphicsDevice.RasterizerState = new RasterizerState {CullMode = CullMode.None};
 
-            try
-            {
-                //GraphicsDevice.RasterizerState = new RasterizerState { FillMode = FillMode.WireFrame };
+            //GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            //GraphicsDevice.BlendState = BlendState.Opaque;
 
-                model.Draw(world, view, projection);
-            }
-            finally
-            {
-                GraphicsDevice.RasterizerState = originalState;
-            }
+            //_largeOakDarkModel.Draw(Matrix.Identity, view, projection);
 
-            /*
-            var vertexBuffer = new VertexBuffer(GraphicsDevice, typeof (VertexPositionColor), 3, BufferUsage.None);
+            _plateGrassModel.Draw(world, view, projection);
 
-            var random = new Random();
+            world = Matrix.CreateTranslation(0, 0, -3);
+            world = Matrix.Multiply(rotationY, world);
 
-            vertexBuffer.SetData(new[]
-            {
-                new VertexPositionColor(new Vector3(random.Next(-10, 10), random.Next(-10, 10), random.Next(-10, 10)), Color.Pink),
-                new VertexPositionColor(new Vector3(random.Next(-10, 10), random.Next(-10, 10), random.Next(-10, 10)), Color.White),
-                new VertexPositionColor(new Vector3(random.Next(-10, 10), random.Next(-10, 10), random.Next(-10, 10)), Color.Green)
-            });
+            _plateRiverModel.Draw(world, view, projection);
 
-            var indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.ThirtyTwoBits, 3, BufferUsage.None);
+            world = Matrix.CreateTranslation(0, 0, -6);
+            world = Matrix.Multiply(rotationY, world);
 
-            indexBuffer.SetData(new[] {0, 1, 2});
-
-            var modelBone = new ModelBone {Transform = Matrix.Identity};
-            var basicEffect = new BasicEffect(GraphicsDevice) {VertexColorEnabled = true};
-            var modelMeshPart = new ModelMeshPart {IndexBuffer = indexBuffer, NumVertices = 3, PrimitiveCount = 1, VertexBuffer = vertexBuffer};
-            var modelMesh = new ModelMesh(GraphicsDevice, new List<ModelMeshPart> {modelMeshPart})
-            {
-                ParentBone = modelBone,
-                Effects = new ModelEffectCollection(new List<Effect> {basicEffect})
-            };
-
-            modelMeshPart.Effect = basicEffect;
-
-
-            var model = new Model(GraphicsDevice, new List<ModelBone> {modelBone}, new List<ModelMesh> {modelMesh});
+            _plateRiverModel.Draw(world, view, projection);
 
             
 
-            var originalState = GraphicsDevice.RasterizerState;
 
-            try
-            {
-                GraphicsDevice.RasterizerState = new RasterizerState {FillMode = FillMode.WireFrame};
-
-                model.Draw(world, view, projection);
-            }
-            finally
-            {
-                GraphicsDevice.RasterizerState = originalState;
-            }
-
-    */
+            /*
             // draw all the stuff
             var destinationRectangle = new Rectangle(8, 8, 83, 42);
 
@@ -135,9 +104,9 @@ namespace Enfilade
 
                         spriteBatch.DrawString(spriteFont, $"{1/totalSeconds:F0}", position, Color.Pink);
                     }
-                });
+                });*/
 
-            base.Draw(gameTime);
+//            base.Draw(gameTime);
         }
     }
 }

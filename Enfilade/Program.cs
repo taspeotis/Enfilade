@@ -7,10 +7,8 @@ namespace Enfilade
         public static void Main()
         {
             using (var enfiladeGame = new EnfiladeGame())
-            using (var graphicsDeviceManager = new GraphicsDeviceManager(enfiladeGame))
+            using (new GraphicsDeviceManager(enfiladeGame))
             {
-                graphicsDeviceManager.PreferMultiSampling = true;
-
                 enfiladeGame.Run();
             }
         }

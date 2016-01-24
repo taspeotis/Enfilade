@@ -272,6 +272,12 @@
     <Content Include="Assets\Models\Plate_Grass_01.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\Models\Plate_River_01.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Models\Plate_River_01.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <Content Include="Assets\Fonts\KenVectorFuture12.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -289,7 +295,6 @@
   <ItemGroup>
     <Compile Include="Assets.cs" />
     <Compile Include="Interfaces\GlassStyle.cs" />
-    <Compile Include="Interfaces\IBasicEffectService.cs" />
     <Compile Include="Interfaces\IModelService.cs" />
     <Compile Include="Interfaces\IUserInterfaceService.cs" />
     <Compile Include="EnfiladeGame.cs" />

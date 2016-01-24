@@ -41,10 +41,6 @@ namespace Enfilade.Services
         // We also don't do relative indexes
         public Model Load(string modelPath)
         {
-            // basicEffect
-            // model something or other
-            // something something
-
             using (var fileStream = File.Open(modelPath, FileMode.Open, FileAccess.Read))
             using (var streamReader = new StreamReader(fileStream))
                 return LoadInternal(streamReader);
@@ -167,13 +163,14 @@ namespace Enfilade.Services
 
                 foreach (var face in faces)
                 {
-                    for (var x = 2; x < face.Length; x++)
+                    for (var x = 0; x < face.Length - 2; x++)
                     {
-                        foreach (var faceIndex in new[] {x, x - 1, 0})
+                        var faceIndexes = x%2 == 1 ? new[] {x, x + 2, x + 1} : new[] {x, x + 1, x + 2};
+
+                        foreach (var faceIndex in faceIndexes)
                         {
                             var faceTuple = face[faceIndex];
 
-                            // TODO: Strongly type this tuple so we don't have to remember what Item2 vs 3 is
                             var position = parsedDirectives.PositionList[faceTuple.Item1 - 1];
                             // ReSharper disable once PossibleInvalidOperationException
                             var normal = parsedDirectives.NormalList[faceTuple.Item3.Value - 1]; // Take the NRE for now
@@ -190,9 +187,9 @@ namespace Enfilade.Services
                 }
 
                 var indexBuffer = new IndexBuffer(_graphicsDevice,
-                    typeof(ushort), vertexIndexes.Count, BufferUsage.None);
+                    typeof (ushort), vertexIndexes.Count, BufferUsage.None);
 
-                indexBuffer.SetData(vertexIndexes.Select(i => (ushort)i).ToArray());
+                indexBuffer.SetData(vertexIndexes.Select(i => (ushort) i).ToArray());
 
                 modelMeshParts.Add(new ModelMeshPart
                 {
