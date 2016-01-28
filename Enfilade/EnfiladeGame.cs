@@ -59,19 +59,20 @@ namespace Enfilade
 
             var aspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
-            var rotationY = Matrix.CreateRotationY((float) gameTime.TotalGameTime.TotalSeconds/2);
+            var rotationY = Matrix.CreateRotationY(2 + (float) gameTime.TotalGameTime.TotalSeconds/2);
             var world = Matrix.Multiply(rotationY, Matrix.Identity);
             var view = Matrix.CreateLookAt(new Vector3(3, 3, 3), Vector3.Zero, Vector3.Up);
             var projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 100);
 
-            GraphicsDevice.RasterizerState = new RasterizerState {CullMode = CullMode.None};
+            GraphicsDevice.RasterizerState = new RasterizerState {FillMode = FillMode.WireFrame};
 
+            // Sometimes need to reset these?
             //GraphicsDevice.DepthStencilState = DepthStencilState.Default;
             //GraphicsDevice.BlendState = BlendState.Opaque;
 
-            //_largeOakDarkModel.Draw(Matrix.Identity, view, projection);
+            _largeOakDarkModel.Draw(Matrix.Identity, view, projection);
 
-            _plateGrassModel.Draw(world, view, projection);
+            //_plateGrassModel.Draw(world, view, projection);
 
             world = Matrix.CreateTranslation(0, 0, -3);
             world = Matrix.Multiply(rotationY, world);
@@ -86,7 +87,6 @@ namespace Enfilade
             
 
 
-            /*
             // draw all the stuff
             var destinationRectangle = new Rectangle(8, 8, 83, 42);
 
@@ -104,9 +104,9 @@ namespace Enfilade
 
                         spriteBatch.DrawString(spriteFont, $"{1/totalSeconds:F0}", position, Color.Pink);
                     }
-                });*/
+                });
 
-//            base.Draw(gameTime);
+            base.Draw(gameTime);
         }
     }
 }

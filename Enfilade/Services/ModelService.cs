@@ -28,11 +28,13 @@ namespace Enfilade.Services
             };
 
         private readonly GraphicsDevice _graphicsDevice;
+        private readonly ITessellationService _tessellationService;
 
         [ImportingConstructor]
-        public ModelService(GraphicsDevice graphicsDevice)
+        public ModelService(GraphicsDevice graphicsDevice, ITessellationService tessellationService)
         {
             _graphicsDevice = graphicsDevice;
+            _tessellationService = tessellationService;
         }
 
         // This is very simplistic
@@ -163,26 +165,22 @@ namespace Enfilade.Services
 
                 foreach (var face in faces)
                 {
-                    for (var x = 0; x < face.Length - 2; x++)
+                    var faceTuples = _tessellationService.Triangulate(
+                        parsedDirectives.PositionList, face, t => t.Item1 - 1);
+
+                    foreach (var faceTuple in faceTuples)
                     {
-                        var faceIndexes = x%2 == 1 ? new[] {x, x + 2, x + 1} : new[] {x, x + 1, x + 2};
+                        var position = parsedDirectives.PositionList[faceTuple.Item1 - 1];
+                        // ReSharper disable once PossibleInvalidOperationException
+                        var normal = parsedDirectives.NormalList[faceTuple.Item3.Value - 1]; // Take the NRE for now
+                        var textureCoordinate = Vector2.Zero; // TODO: This
 
-                        foreach (var faceIndex in faceIndexes)
-                        {
-                            var faceTuple = face[faceIndex];
+                        var vertexPositionNormalTexture =
+                            new VertexPositionNormalTexture(position, normal, textureCoordinate);
 
-                            var position = parsedDirectives.PositionList[faceTuple.Item1 - 1];
-                            // ReSharper disable once PossibleInvalidOperationException
-                            var normal = parsedDirectives.NormalList[faceTuple.Item3.Value - 1]; // Take the NRE for now
-                            var textureCoordinate = Vector2.Zero; // TODO: This
-
-                            var vertexPositionNormalTexture =
-                                new VertexPositionNormalTexture(position, normal, textureCoordinate);
-
-                            // TODO: Don't just duplicate the positions/normals/coordinates. We can be more efficient.
-                            vertexPositionNormalTextures.Add(vertexPositionNormalTexture);
-                            vertexIndexes.Add(vertexPositionNormalTextures.Count - 1);
-                        }
+                        // TODO: Don't just duplicate the positions/normals/coordinates. We can be more efficient.
+                        vertexPositionNormalTextures.Add(vertexPositionNormalTexture);
+                        vertexIndexes.Add(vertexPositionNormalTextures.Count - 1);
                     }
                 }
 

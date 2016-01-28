@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enfilade", "Enfilade\Enfilade.csproj", "{E19B62EA-3CA4-43E1-B747-6D14B0434923}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enfilade.Tests", "Enfilade.Tests\Enfilade.Tests.csproj", "{10499009-21B9-4762-8EB8-EB71EA538068}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{E19B62EA-3CA4-43E1-B747-6D14B0434923}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E19B62EA-3CA4-43E1-B747-6D14B0434923}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E19B62EA-3CA4-43E1-B747-6D14B0434923}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10499009-21B9-4762-8EB8-EB71EA538068}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10499009-21B9-4762-8EB8-EB71EA538068}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10499009-21B9-4762-8EB8-EB71EA538068}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10499009-21B9-4762-8EB8-EB71EA538068}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
