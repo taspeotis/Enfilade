@@ -21,7 +21,7 @@ namespace Enfilade
         {
             _compositionContainer = new CompositionContainer(AssemblyCatalog);
 
-            try
+            //try
             {
                 _compositionContainer.ComposeExportedValue(this);
                 _compositionContainer.ComposeExportedValue(Content);
@@ -34,13 +34,13 @@ namespace Enfilade
                 //_plateGrassModel = _modelService.Load("Assets/Models/Plate_Grass_01.obj");
                 _plateRiverModel = _modelService.Load("Assets/Models/Plate_River_01.obj");
             }
-            catch
-            {
-                _compositionContainer.Dispose();
-                _compositionContainer = null;
+            //catch
+            //{
+                //_compositionContainer.Dispose();
+                //_compositionContainer = null;
 
-                throw;
-            }
+                //throw;
+            //}
 
             base.BeginRun();
         }
@@ -59,12 +59,16 @@ namespace Enfilade
 
             var aspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
-            var rotationY = Matrix.CreateRotationY(2 + (float) gameTime.TotalGameTime.TotalSeconds/2);
+            var rotationY = Matrix.CreateRotationY(2 + (float) gameTime.TotalGameTime.TotalSeconds/20);
             var world = Matrix.Multiply(rotationY, Matrix.Identity);
-            var view = Matrix.CreateLookAt(new Vector3(3, 3, 3), Vector3.Zero, Vector3.Up);
+            var view = Matrix.CreateLookAt(new Vector3(1.5f, 1.5f, 0), new Vector3(-1.0f,0,0), Vector3.Up);
             var projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 100);
 
-            GraphicsDevice.RasterizerState = new RasterizerState {CullMode = CullMode.None};
+            GraphicsDevice.RasterizerState = new RasterizerState
+            {
+                CullMode = CullMode.None,
+                FillMode = FillMode.WireFrame
+            };
 
             // Sometimes need to reset these?
             //GraphicsDevice.DepthStencilState = DepthStencilState.Default;
@@ -74,13 +78,13 @@ namespace Enfilade
 
             //_plateGrassModel.Draw(world, view, projection);
 
-            world = Matrix.CreateTranslation(0, 0, -3);
+            world = Matrix.CreateTranslation(0, 0, 0);
             world = Matrix.Multiply(rotationY, world);
 
             _plateRiverModel.Draw(world, view, projection);
 
-            world = Matrix.CreateTranslation(0, 0, -6);
-            world = Matrix.Multiply(rotationY, world);
+            //world = Matrix.CreateTranslation(0, 0, -6);
+            //world = Matrix.Multiply(rotationY, world);
 
             _plateRiverModel.Draw(world, view, projection);
 

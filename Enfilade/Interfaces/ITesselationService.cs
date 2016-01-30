@@ -6,7 +6,7 @@ namespace Enfilade.Interfaces
 {
     public interface ITessellationService
     {
-        bool IsConvexPolygon(int vertexIndexCount, Func<int, Vector3> indexFunc);
+        bool IsConcavePolygon(int vertexIndexCount, Func<int, Vector3> indexFunc, out int concaveVertexIndex);
 
         IEnumerable<TVertexIndex> Triangulate<TVertexIndex>(IList<Vector3> vertexPositions,
             IEnumerable<TVertexIndex> vertexIndexes, Func<TVertexIndex, int> indexFunc);
