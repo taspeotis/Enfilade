@@ -30,8 +30,8 @@ namespace Enfilade
                 _modelService = _compositionContainer.GetExportedValue<IModelService>();
                 _userInterfaceService = _compositionContainer.GetExportedValue<IUserInterfaceService>();
 
-                _largeOakDarkModel = _modelService.Load("Assets/Models/Large_Oak_Dark_01.obj");
-                _plateGrassModel = _modelService.Load("Assets/Models/Plate_Grass_01.obj");
+                //_largeOakDarkModel = _modelService.Load("Assets/Models/Large_Oak_Dark_01.obj");
+                //_plateGrassModel = _modelService.Load("Assets/Models/Plate_Grass_01.obj");
                 _plateRiverModel = _modelService.Load("Assets/Models/Plate_River_01.obj");
             }
             catch
@@ -64,13 +64,13 @@ namespace Enfilade
             var view = Matrix.CreateLookAt(new Vector3(3, 3, 3), Vector3.Zero, Vector3.Up);
             var projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 100);
 
-            GraphicsDevice.RasterizerState = new RasterizerState {FillMode = FillMode.WireFrame};
+            GraphicsDevice.RasterizerState = new RasterizerState {CullMode = CullMode.None};
 
             // Sometimes need to reset these?
             //GraphicsDevice.DepthStencilState = DepthStencilState.Default;
             //GraphicsDevice.BlendState = BlendState.Opaque;
 
-            _largeOakDarkModel.Draw(Matrix.Identity, view, projection);
+            //_largeOakDarkModel.Draw(Matrix.Identity, view, projection);
 
             //_plateGrassModel.Draw(world, view, projection);
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.Linq;
 using Enfilade.Extensions;
+using Enfilade.Infrastructure;
 using Enfilade.Interfaces;
 using Microsoft.Xna.Framework;
 
@@ -22,6 +22,9 @@ namespace Enfilade.Services
 
         public bool IsConvexPolygon(int vertexIndexCount, Func<int, Vector3> indexFunc)
         {
+            if (vertexIndexCount < 3)
+                throw new ArgumentOutOfRangeException(nameof(vertexIndexCount), vertexIndexCount, null);
+
             var positiveZ = false;
             var negativeZ = false;
 
@@ -62,40 +65,30 @@ namespace Enfilade.Services
                 yield break;
             }
 
-            //yield break;
-
-
-            var bailout = 0;
-
-            while (vertexIndexesList.Count > 3)
+            while (vertexIndexesList.Count > 4)
             {
-                if (bailout++ > 1000)
-                    break;
-
-                for (var candidateVertexIndex = 2;
-                    candidateVertexIndex < vertexIndexesList.Count;
-                    ++candidateVertexIndex)
+                for (var candidateVertexIndex = 0; candidateVertexIndex < vertexIndexesList.Count;)
                 {
-                    var v1 = vertexPositions[indexFunc(vertexIndexesList[candidateVertexIndex - 2])];
-                    var v2 = vertexPositions[indexFunc(vertexIndexesList[candidateVertexIndex - 1])];
-                    var v3 = vertexPositions[indexFunc(vertexIndexesList[candidateVertexIndex])];
+                    var cvi1 = vertexIndexesList[candidateVertexIndex];
+                    var cvi2 = vertexIndexesList[(candidateVertexIndex + 2) % vertexIndexesList.Count];
+
+                    var v1 = Vector3.Transform(vertexPositions[indexFunc(cvi1)], transformationMatrix);
+                    var v2 = Vector3.Transform(vertexPositions[indexFunc(cvi2)], transformationMatrix);
 
                     var anyLinesIntersect = false;
 
-                    // does this intersect with any of the other lines?
-                    for (var vertexIndex = 2; vertexIndex < vertexIndexesList.Count; ++vertexIndex)
+                    for (var vertexIndex = 0; vertexIndex < vertexIndexesList.Count; ++vertexIndex)
                     {
-                        if (vertexIndex == candidateVertexIndex) continue;
+                        var vi1 = vertexIndex;
+                        var vi2 = (vertexIndex + 1) % vertexIndexesList.Count;
 
-                        var p1 = vertexPositions[indexFunc(vertexIndexesList[vertexIndex])];
-                        var p2 =
-                            vertexPositions[indexFunc(vertexIndexesList[(vertexIndex + 1)%vertexIndexesList.Count])];
+                        var p1 = vertexPositions[indexFunc(vertexIndexesList[vi1])];
+                        var p2 = vertexPositions[indexFunc(vertexIndexesList[vi2])];
 
-                        var linesIntersect = LinesIntersect(p1, p2, v1, v2) ||
-                                             LinesIntersect(p1, p2, v2, v3) ||
-                                             LinesIntersect(p1, p2, v3, v1);
+                        p1 = Vector3.Transform(p1, transformationMatrix);
+                        p2 = Vector3.Transform(p2, transformationMatrix);
 
-                        if (linesIntersect)
+                        if (LinesIntersect(p1, p2, v1, v2))
                         {
                             anyLinesIntersect = true;
                             break;
@@ -103,17 +96,23 @@ namespace Enfilade.Services
                     }
 
                     if (anyLinesIntersect)
+                    {
+                        candidateVertexIndex++;
+
                         continue;
+                    }
 
-                    yield return vertexIndexesList[candidateVertexIndex - 2];
-                    yield return vertexIndexesList[candidateVertexIndex - 1];
-                    yield return vertexIndexesList[candidateVertexIndex];
+                    // Winding ??
+                    yield return cvi1;
+                    yield return vertexIndexesList[(candidateVertexIndex + 1)%vertexIndexesList.Count];
+                    yield return cvi2;
 
-                    vertexIndexesList.RemoveAt(candidateVertexIndex - 1);
+                    vertexIndexesList.RemoveAt((candidateVertexIndex + 1) % vertexIndexesList.Count);
+                    candidateVertexIndex = 0;
                 }
             }
 
-            foreach (var vertexIndex in vertexIndexesList)
+            foreach (var vertexIndex in GetTriangleFanVertexIndexes(vertexIndexesList))
                 yield return vertexIndex;
         }
 
@@ -132,6 +131,12 @@ namespace Enfilade.Services
         private bool LinesIntersect(
             Vector3 firstLineStart, Vector3 firstLineEnd, Vector3 secondLineStart, Vector3 secondLineEnd)
         {
+            // Bit of a kludge to avoid dealing with indicative XY values but disparate Z values
+            firstLineStart.Z = 0;
+            firstLineEnd.Z = 0;
+            secondLineStart.Z = 0;
+            secondLineEnd.Z = 0;
+
             Vector2 intersectionPoint;
 
             if (!_collisionService.LinesIntersect(
@@ -142,12 +147,16 @@ namespace Enfilade.Services
                 return false;
             }
 
+            // Note the kludge: the 0 for Z is not a coincidence.
             var ignoredPoint = new Vector3(intersectionPoint.X, intersectionPoint.Y, 0);
 
-            return firstLineStart != ignoredPoint &&
-                   firstLineEnd != ignoredPoint &&
-                   secondLineStart != ignoredPoint &&
-                   secondLineEnd != ignoredPoint;
+            Func<Vector3, Vector3, bool> notEqualFunc =
+                (v1, v2) => Math.Abs((v1 - v2).Length()) > Constants.FloatEpsilon;
+
+            return notEqualFunc(firstLineStart, ignoredPoint) &&
+                   notEqualFunc(firstLineEnd, ignoredPoint) &&
+                   notEqualFunc(secondLineStart, ignoredPoint) &&
+                   notEqualFunc(secondLineEnd, ignoredPoint);
         }
 
         private static Vector3 GetSurfaceNormal<TVertexIndex>(IList<Vector3> vertexPositions,
@@ -155,10 +164,10 @@ namespace Enfilade.Services
         {
             var surfaceNormal = Vector3.Zero;
 
-            for (var vertexIndex = 1; vertexIndex < vertexIndexes.Count; ++vertexIndex)
+            for (var vertexIndex = 0; vertexIndex < vertexIndexes.Count; ++vertexIndex)
             {
-                var vertexIndex1 = indexFunc(vertexIndexes[vertexIndex - 1]);
-                var vertexIndex2 = indexFunc(vertexIndexes[vertexIndex]);
+                var vertexIndex1 = indexFunc(vertexIndexes[vertexIndex]);
+                var vertexIndex2 = indexFunc(vertexIndexes[(vertexIndex + 1)%vertexIndexes.Count]);
 
                 surfaceNormal += Vector3.Cross(vertexPositions[vertexIndex1], vertexPositions[vertexIndex2]);
             }
