@@ -294,6 +294,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets.cs" />
+    <Compile Include="Extensions\Vector3EnumerableExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
     <Compile Include="Infrastructure\Constants.cs" />
     <Compile Include="Interfaces\GlassStyle.cs" />

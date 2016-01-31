@@ -4,7 +4,7 @@ using Enfilade.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
 
-namespace Enfilade.Tests
+namespace Enfilade.Tests.ServicesTests
 {
     [TestClass]
     public class TessellationServiceTests
@@ -27,6 +27,24 @@ namespace Enfilade.Tests
             new Vector3(3f, 0f, 0f),
             new Vector3(3f, 0.3f, 0f),
             new Vector3(0f, 0.3f, 0f)
+        };
+
+        private static readonly Vector3[] Polygon =
+        {
+            new Vector3(2.60396f, 0.15f, -1.27492f),
+            new Vector3(2.2413f, 0.15f, -1.92432f),
+            new Vector3(2.38747f, 0.15f, -2.38719f),
+            new Vector3(2.2413f, 0.15f, -3f),
+            new Vector3(0.758698f, 0.15f, -3f),
+            new Vector3(0.904869f, 0.15f, -2.38719f),
+            new Vector3(0.758698f, 0.15f, -1.92432f),
+            new Vector3(1.12136f, 0.15f, -1.27492f),
+            new Vector3(0.758698f, 0.15f, -0.701031f),
+            new Vector3(0.877648f, 0.15f, -0.371864f),
+            new Vector3(0.758698f, 0.15f, 0f),
+            new Vector3(2.2413f, 0.15f, 0f),
+            new Vector3(2.36025f, 0.15f, -0.371864f),
+            new Vector3(2.2413f, 0.15f, -0.701031f)
         };
 
         private TessellationService _tessellationService;
@@ -57,7 +75,7 @@ namespace Enfilade.Tests
                 ConcavePolygon.Length, i => ConcavePolygon[i], out concaveVertexIndex);
 
             Assert.IsTrue(isConcavePolygon);
-            Assert.AreEqual(concaveVertexIndex, 3);
+            Assert.AreEqual(3, concaveVertexIndex);
         }
 
         [TestMethod]
@@ -70,19 +88,24 @@ namespace Enfilade.Tests
 
             _tessellationService.IsConcavePolygon(concavePolygon.Count, indexFunc, out concaveVertexIndex);
 
-            Assert.AreEqual(concaveVertexIndex, 4);
+            Assert.AreEqual(3, concaveVertexIndex);
             concavePolygon.RemoveAt(concaveVertexIndex);
 
             _tessellationService.IsConcavePolygon(concavePolygon.Count, indexFunc, out concaveVertexIndex);
 
-            Assert.AreEqual(concaveVertexIndex, 3);
+            Assert.AreEqual(3, concaveVertexIndex);
             concavePolygon.RemoveAt(concaveVertexIndex);
+
+            _tessellationService.IsConcavePolygon(concavePolygon.Count, indexFunc, out concaveVertexIndex);
+
+            Assert.AreEqual(3, concaveVertexIndex);
+            
         }
 
         [TestMethod]
         public void Triangulate_Triangulates_ConcavePolygon()
         {
-            var x = _tessellationService.Triangulate(ConcavePolygon, Enumerable.Range(0, ConcavePolygon.Length), i => i);
+            var x = _tessellationService.Triangulate(Polygon, Enumerable.Range(0, Polygon.Length), i => i).ToList();
         }
     }
 }

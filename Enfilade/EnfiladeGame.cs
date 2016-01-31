@@ -61,7 +61,7 @@ namespace Enfilade
 
             var rotationY = Matrix.CreateRotationY(2 + (float) gameTime.TotalGameTime.TotalSeconds/20);
             var world = Matrix.Multiply(rotationY, Matrix.Identity);
-            var view = Matrix.CreateLookAt(new Vector3(1.5f, 1.5f, 0), new Vector3(-1.0f,0,0), Vector3.Up);
+            var view = Matrix.CreateLookAt(new Vector3(1.5f, 3.5f, 0), new Vector3(-1.0f,0,0), Vector3.Up);
             var projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 100);
 
             GraphicsDevice.RasterizerState = new RasterizerState

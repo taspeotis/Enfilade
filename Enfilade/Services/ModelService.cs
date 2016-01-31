@@ -184,6 +184,9 @@ namespace Enfilade.Services
                     }
                 }
 
+                if (vertexIndexes.Count == 0)
+                    continue;
+
                 var indexBuffer = new IndexBuffer(_graphicsDevice,
                     typeof (ushort), vertexIndexes.Count, BufferUsage.None);
 

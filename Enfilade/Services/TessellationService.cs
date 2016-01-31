@@ -48,7 +48,7 @@ namespace Enfilade.Services
             IEnumerable<TVertexIndex> vertexIndexes, Func<TVertexIndex, int> indexFunc)
         {
             var vertexIndexesList = vertexIndexes.ToList();
-            var surfaceNormal = GetSurfaceNormal(vertexPositions, vertexIndexesList, indexFunc);
+            var surfaceNormal = vertexIndexesList.Select(vi => vertexPositions[indexFunc(vi)]).GetSurfaceNormal();
             var transformationMatrix = surfaceNormal.CreateRotationMatrixTo(Vector3.UnitZ);
 
             for (int concaveVertexIndex;
@@ -77,22 +77,6 @@ namespace Enfilade.Services
                 yield return vertexIndexesList[vertexIndex - 1];
                 yield return vertexIndexesList[vertexIndex];
             }
-        }
-
-        private static Vector3 GetSurfaceNormal<TVertexIndex>(IList<Vector3> vertexPositions,
-            IList<TVertexIndex> vertexIndexes, Func<TVertexIndex, int> indexFunc)
-        {
-            var surfaceNormal = Vector3.Zero;
-
-            for (var vertexIndex = 0; vertexIndex < vertexIndexes.Count; ++vertexIndex)
-            {
-                var vertexIndex1 = indexFunc(vertexIndexes[vertexIndex]);
-                var vertexIndex2 = indexFunc(vertexIndexes[(vertexIndex + 1)%vertexIndexes.Count]);
-
-                surfaceNormal += Vector3.Cross(vertexPositions[vertexIndex1], vertexPositions[vertexIndex2]);
-            }
-
-            return Vector3.Normalize(surfaceNormal);
         }
     }
 }
